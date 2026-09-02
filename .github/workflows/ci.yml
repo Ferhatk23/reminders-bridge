@@ -16,6 +16,8 @@ jobs:
       - name: Install
         run: pip install -r api/requirements.txt
       - name: Import the app
+        # Importing must not require a writable cache path — the SQLite
+        # connection is opened lazily on first use.
         run: python -c "from reminders_api.app import app; print(len(app.routes), 'routes')"
         working-directory: api
       - name: Quick-add parser

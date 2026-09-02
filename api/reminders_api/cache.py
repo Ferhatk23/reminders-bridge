@@ -44,13 +44,30 @@ CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT);
 
 class Cache:
     def __init__(self, path: str = DB_PATH) -> None:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        self._path = path
         self._lock = threading.RLock()
-        self._db = sqlite3.connect(path, check_same_thread=False)
-        self._db.row_factory = sqlite3.Row
-        self._db.execute("PRAGMA journal_mode=WAL")
-        self._db.executescript(_SCHEMA)
-        self._db.commit()
+        self._conn: sqlite3.Connection | None = None
+
+    @property
+    def _db(self) -> sqlite3.Connection:
+        """Verbindung erst beim ersten Zugriff aufbauen.
+
+        Ein Import darf keine Verzeichnisse anlegen — sonst laesst sich das
+        Paket weder importieren noch testen, ohne dass der Cache-Pfad schon
+        beschreibbar ist.
+        """
+        with self._lock:
+            if self._conn is None:
+                folder = os.path.dirname(self._path)
+                if folder:
+                    os.makedirs(folder, exist_ok=True)
+                conn = sqlite3.connect(self._path, check_same_thread=False)
+                conn.row_factory = sqlite3.Row
+                conn.execute("PRAGMA journal_mode=WAL")
+                conn.executescript(_SCHEMA)
+                conn.commit()
+                self._conn = conn
+            return self._conn
 
     # -- Meta ---------------------------------------------------------------
 
