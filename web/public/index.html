@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1115">
+  <title>Erinnerungen</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/favicon.svg">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <button class="iconbtn only-narrow" id="menuBtn" title="Listen" aria-label="Listen">☰</button>
+  <a class="brand" href="/"><span class="brand-dot"></span>Erinnerungen</a>
+  <div class="search">
+    <input id="search" type="search" placeholder="Suchen…" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="topbar-right">
+    <span id="status" class="status"></span>
+    <button class="iconbtn" id="refreshBtn" title="Von iCloud neu laden (r)" aria-label="Neu laden">⟳</button>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <nav class="views" id="views"></nav>
+    <div class="side-head">
+      <span>Meine Listen</span>
+      <button class="iconbtn tiny" id="newListBtn" title="Neue Liste">＋</button>
+    </div>
+    <nav class="lists" id="lists"></nav>
+    <div class="side-foot">
+      <span class="kbd-hint"><kbd>n</kbd> neu · <kbd>/</kbd> suchen · <kbd>r</kbd> laden</span>
+    </div>
+  </aside>
+
+  <main class="pane">
+    <div id="banner" class="banner hidden"></div>
+
+    <div class="pane-head">
+      <div>
+        <h1 id="paneTitle">…</h1>
+        <div class="pane-sub" id="paneSub"></div>
+      </div>
+      <div class="pane-actions" id="paneActions"></div>
+    </div>
+
+    <form class="quickadd" id="quickadd" autocomplete="off">
+      <span class="qa-circle" aria-hidden="true"></span>
+      <input id="qaInput" placeholder="Neue Erinnerung … z.B. „Zahnarzt anrufen morgen 14:30 !!“" spellcheck="false">
+      <select id="qaList" title="Zielliste"></select>
+      <button class="btn primary" type="submit">Hinzufügen</button>
+    </form>
+    <div class="qa-hint" id="qaHint"></div>
+
+    <div id="taskarea"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="detail" id="detail" aria-hidden="true">
+  <div class="detail-head">
+    <strong>Details</strong>
+    <button class="iconbtn" id="detailClose" title="Schließen (Esc)" aria-label="Schließen">✕</button>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</aside>
+
+<aside class="login" id="login" aria-hidden="true">
+  <div class="detail-head">
+    <strong>Bei iCloud anmelden</strong>
+    <button class="iconbtn" id="loginClose" title="Schließen" aria-label="Schließen">✕</button>
+  </div>
+  <div class="login-body">
+    <p class="muted small" id="loginWhy"></p>
+    <p class="small">Apple-ID: <b id="loginId"></b></p>
+
+    <form id="loginStep1" class="field" autocomplete="off">
+      <span>Apple-ID-Passwort (das echte, nicht app-spezifisch)</span>
+      <input id="loginPw" type="password" autocomplete="current-password" placeholder="••••••••">
+      <button class="btn primary" id="loginGo" type="submit">Weiter</button>
+    </form>
+
+    <form id="loginStep2" class="field hidden" autocomplete="off">
+      <span>Sechsstelliger Code von deinem Apple-Gerät</span>
+      <input id="loginCode" inputmode="numeric" autocomplete="one-time-code"
+             maxlength="8" placeholder="123456">
+      <button class="btn primary" id="codeGo" type="submit">Bestätigen</button>
+    </form>
+
+    <p class="login-err" id="loginErr"></p>
+    <p class="muted small">
+      Das Passwort geht nur an diesen Server, wird nicht gespeichert und nicht
+      protokolliert. Gespeichert wird allein die von Apple ausgestellte Session —
+      sie hält rund zwei Monate.
+    </p>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/config.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

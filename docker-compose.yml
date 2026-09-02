@@ -1,0 +1,47 @@
+# Zwei Betriebsarten:
+#
+#   docker compose up -d api
+#       Ein Container. Die API liefert die Oberfläche gleich mit aus
+#       (SERVE_WEB=true) — der einfachste Weg.
+#
+#   docker compose --profile split up -d
+#       API und Oberfläche getrennt. Nginx serviert die Dateien und reicht
+#       /v1 an die API weiter, inklusive API-Token als Header.
+#
+# Anmelden danach im Browser oder per:
+#   curl -X POST localhost:8000/v1/session/login -H 'Content-Type: application/json' \
+#        -d '{"password":"…"}'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: reminders-bridge-api
+    restart: unless-stopped
+    environment:
+      ICLOUD_USERNAME: ${ICLOUD_USERNAME:?Apple-ID fehlt}
+      API_TOKEN: ${API_TOKEN:-}
+      TZ: ${TZ:-Europe/Berlin}
+      SERVE_WEB: ${SERVE_WEB:-true}
+      SYNC_DELTA_SECONDS: ${SYNC_DELTA_SECONDS:-45}
+      SYNC_FULL_SECONDS: ${SYNC_FULL_SECONDS:-300}
+      SYNC_ACTIVE_WINDOW: ${SYNC_ACTIVE_WINDOW:-600}
+    volumes:
+      - ./data/session:/session   # iCloud-Sitzung, hält rund zwei Monate
+      - ./data/cache:/data        # SQLite-Lesecache, jederzeit wegwerfbar
+    ports:
+      - "${PORT:-8000}:8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: reminders-bridge-web
+    restart: unless-stopped
+    profiles: ["split"]
+    depends_on: [api]
+    environment:
+      API_URL: http://api:8000
+      API_TOKEN: ${API_TOKEN:-}
+    ports:
+      - "${WEB_PORT:-8080}:80"

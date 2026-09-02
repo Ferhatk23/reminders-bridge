@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -r api/requirements.txt
+      - name: Import the app
+        run: python -c "from reminders_api.app import app; print(len(app.routes), 'routes')"
+        working-directory: api
+      - name: Quick-add parser
+        run: |
+          python - <<'PY'
+          from reminders_api.quickadd import parse
+          from datetime import date
+          t = date(2026, 9, 2)          # a Wednesday
+          assert parse("Zahnarzt morgen 14:30", t) == {"title": "Zahnarzt", "due": "2026-09-03T14:30", "priority": 0}
+          assert parse("Steuer !!! 15.10.", t)["priority"] == 1
+          assert parse("Mach das so", t)["due"] is None   # "so" must not be read as Sunday
+          print("ok")
+          PY
+        working-directory: api
+      - name: Build image
+        run: docker build -f api/Dockerfile -t reminders-bridge-api .
