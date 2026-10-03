@@ -375,7 +375,12 @@ class Store:
             ):
                 for rec in zone.records:
                     rtype = getattr(rec, "recordType", None)
-                    f = rec.fields
+                    # CloudKit change pages contain tombstones for deleted
+                    # records. pyicloud represents those as CKTombstoneRecord,
+                    # which has no fields; they must be ignored here.
+                    f = getattr(rec, "fields", None)
+                    if f is None:
+                        continue
                     deleted = int(f.get_value("Deleted") or 0)
 
                     if rtype == "ListSection":
